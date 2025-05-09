@@ -1,0 +1,21 @@
+{
+  "motoristas": [
+    {
+      "id": "1746795338174",
+      "nome": "dudu",
+      "data_nascimento": "24-10-2007",
+      "carteira_habilitacao": "ABCD1234",
+      "onibus_id": null
+    }
+  ],
+  "onibus": [
+    {
+      "id": "1746795831836",
+      "placa": "XYZ-1234",
+      "modelo": "Volksbus 17.230",
+      "ano_fabricacao": 2018,
+      "capacidade": 48,
+      "motorista_id": null
+    }
+  ]
+}
