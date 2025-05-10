@@ -1,21 +1,21 @@
 {
   "motoristas": [
     {
-      "id": "1746795338174",
+      "id_motorista": "1746878184446",
       "nome": "dudu",
-      "data_nascimento": "24-10-2007",
-      "carteira_habilitacao": "ABCD1234",
-      "onibus_id": null
+      "data_nascimento": "24-20-2007",
+      "carteira_habilitacao": "2342354654367",
+      "onibus_id": 0
     }
   ],
   "onibus": [
     {
-      "id": "1746795831836",
-      "placa": "XYZ-1234",
-      "modelo": "Volksbus 17.230",
+      "id_onibus": "1746878182888",
+      "placa": "24-20-2007",
+      "modelo": "mercedes",
       "ano_fabricacao": 2018,
-      "capacidade": 48,
-      "motorista_id": null
+      "capacidade": 30,
+      "motorista_id": 0
     }
   ]
 }

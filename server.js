@@ -34,11 +34,11 @@ app.post("/motoristas", async (request, response) =>{
     }   
 
     const novoMotorista = {
-        id: Date.now().toString(),
+        id_motorista: Date.now().toString(),
         nome,
         data_nascimento,
         carteira_habilitacao,
-        onibus_id
+        onibus_id: 0
     }
 
     try {
@@ -48,7 +48,7 @@ app.post("/motoristas", async (request, response) =>{
         db_motorista.motoristas.push(novoMotorista)
 
         await fs.writeFile(DATABASE_URL, JSON.stringify(db_motorista, null, 2));
-        response.status(201).json({mensagem: "Participante cadastrado", novoMotorista})
+        response.status(201).json({mensagem: "Motorista cadastrado", novoMotorista})
 
     } catch (error) {
         console.log(error)
@@ -79,12 +79,12 @@ app.post("/onibus", async (request, response) =>{
     }
     
     const novoOnibus = {
-        id: Date.now().toString(),
+        id_onibus: Date.now().toString(),
         placa,
         modelo,
         ano_fabricacao,
         capacidade,
-        motorista_id
+        motorista_id: 0
     }
 
     try {
@@ -94,7 +94,7 @@ app.post("/onibus", async (request, response) =>{
         db_onibus.onibus.push(novoOnibus)
 
         await fs.writeFile(DATABASE_URL, JSON.stringify(db_onibus, null, 2));
-        response.status(201).json({mensagem: "Participante cadastrado", novoOnibus})
+        response.status(201).json({mensagem: "Onibus cadastrado", novoOnibus})
 
     } catch (error) {
         console.log(error)
@@ -120,10 +120,6 @@ app.get("/motoristas", async (request, response) => {
     }
 })
 
-app.listen(PORT, () => {
-    console.log("Servidor iniciado na porta " + PORT)
-})
-
 //listagem de onibus
 app.get("/onibus", async (request, response) => {
     try {
@@ -134,10 +130,101 @@ app.get("/onibus", async (request, response) => {
             response.status(200).json({ mensagem: "Nenhum motorista cadastrado" })
         }
 
-        response.status(200).json({ mensagem: "Lista de motoristas", data: db_onibus.onibus })
+        response.status(200).json({ mensagem: "Lista de onibus", data: db_onibus.onibus })
     } catch (error) {
         console.log(error)
         response.status(500).json({ mensagem: "Internal server error" })
+    }
+})
+
+app.put("/motoristas/:id/onibus", async (request, response) => {
+    const { id } = request.params
+    const { onibus_id } = request.body
+    if (!onibus_id){
+
+        response.status(400).json({mensagem:"ID do onibus é obrigatorio"})
+        return
+    }
+    try {
+        const data = await fs.readFile(DATABASE_URL, 'utf-8')
+        const db = await JSON.parse(data)
+
+        const motorista = db.motoristas.find((motorista) => motorista.id_motorista === id)
+        console.log(motorista)
+        
+        const onibus = db.onibus.find((onibus)=>onibus.id_onibus === onibus_id)
+
+        if(!motorista || !onibus){
+            response.status(400).json({mensagem:"Motorista ou ônibus inválido"})
+            return
+        }
+
+        motorista.onibus_id = onibus_id
+        onibus.motorista_id = id
+
+        await fs.writeFile(DATABASE_URL, JSON.stringify(db, null, 2))
+        response.status(201).json({mensagem:"Vinculo reralizado"})
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({mensagem:"Internal server error"})
+    }
+})
+
+app.get("/onibus/:id/motorista", async (request,response) => {
+    const { id } = request.params
+    try {
+        const data = await fs.readFile(DATABASE_URL, 'utf-8')
+        const db = await JSON.parse(data)
+
+        const encontrarOnibus = db.onibus.find((onibus)=> onibus.id_onibus === id)
+        if(!encontrarOnibus){
+            response.status(404).json({mensagem:"ônibus não encontrado"})
+            return
+        }
+
+        const infoMotorista = db.motoristas.find((motorista) => motorista.id_motorista === encontrarOnibus.motorista_id)
+
+        const infoMotoristaOnibus = {
+            "onibus": encontrarOnibus,
+            "motorista": infoMotorista == undefined ? "Não existe vinculo": infoMotorista
+        }
+        response.status(200).json(infoMotoristaOnibus)
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({mensagem:"Internal server error"})
+    }
+})
+
+app.delete("/onibus/:id/motorista", async (request, response) => {
+    const { id } = request.params
+
+    try {
+        const data = await fs.readFile(DATABASE_URL, 'utf-8')
+        const db = await JSON.parse(data)
+
+        const encontrarOnibus = db.onibus.find((onibus) => onibus.id_onibus === id)
+
+        
+        if(!encontrarOnibus){
+            response.status(404).json({mensagem:"ônibus não encontrado"})
+            return
+        }
+
+        const encontrarVinculomotorista = db.motoristas.find((motorista) => motorista.id_motorista === encontrarOnibus.motorista_id)
+        if(!encontrarVinculomotorista){
+            response.status(404).json({mensagem:"Não existe motorista para esse onibus"})
+            return
+        }
+
+        encontrarOnibus.motorista_id = 0
+        encontrarVinculomotorista.onibus_id = 0
+
+        await fs.writeFile(DATABASE_URL, JSON.stringify(db,null,2))
+
+        response.status(200).json({mensagem:"onibus desvinculado com sucesso"})
+
+    } catch (error) {
+        
     }
 })
 
