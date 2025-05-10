@@ -224,7 +224,8 @@ app.delete("/onibus/:id/motorista", async (request, response) => {
         response.status(200).json({mensagem:"onibus desvinculado com sucesso"})
 
     } catch (error) {
-        
+        console.log(error)
+        response.status(500).json({mensagem: "Internal server error"})
     }
 })
 
